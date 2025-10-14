@@ -1,0 +1,21 @@
+services:
+  
+  api:
+   
+    build: .
+   
+    container_name: movie-watchlist-api
+    
+    ports:
+      - "8000:8000"
+    
+    # Auto-restart if it crashes
+    restart: unless-stopped
+    
+    # Mount your code as a volume (for development)
+    # This means changes to your code reflect immediately without rebuilding
+    volumes:
+      - .:/app
+    
+    # Override the CMD to enable hot reload during development
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload

@@ -1,57 +1,262 @@
-# Python Developer Take-Home Challenge: Movie Watchlist API
+# Movie Watchlist API
 
-Welcome to our take-home programming challenge! This exercise is designed to assess your skills in building a simple, yet functional, RESTful API using Python. We're looking for clean, well-structured, and maintainable code that demonstrates your understanding of core software engineering principles.
+A RESTful API for managing movie watchlists built with FastAPI. Users can retrieve, add, and remove movies from their personal watchlists with full validation and error handling.
 
-## The Challenge
+## Features
 
-Your task is to complete a "Movie Watchlist" service. This service will allow users to manage a list of movies they want to watch. We have provided a boilerplate with a predefined list of movies and a simple in-memory database.
+- Retrieve user's watchlist with full movie details
+- Add movies to watchlist with duplicate prevention
+- Remove movies from watchlist
+- Input validation using Pydantic models
+- Asynchronous operations with asyncio
+- Comprehensive unit tests with pytest
+- Docker support for easy deployment
 
-### Core Features
+## Tech Stack
 
-1. **Retrieve a User's Watchlist:**
-  * Create an API endpoint that retrieves all the movies on a user's watchlist from the database.
+- **FastAPI** - Modern, fast web framework for building APIs
+- **Pydantic** - Data validation using Python type annotations
+- **Python 3.11** - Asynchronous programming with asyncio
+- **pytest** - Testing framework
+- **Docker** - Containerization
 
-2. **Add a Movie to a Watchlist:**
-  * Create an API endpoint that adds a movie to a user's watchlist.
+## Project Structure
 
-3. **Remove a Movie from a Watchlist:**
-  * Create an API endpoint that removes a movie from a user's watchlist.
+```
+fastapi-movie-watchlist/
+├── main.py                 # FastAPI application and endpoints
+├── movies.json            # Movie data
+├── requirements.txt       # Python dependencies
+├── Dockerfile            # Docker image configuration
+├── docker-compose.yml    # Docker Compose configuration
+├── .dockerignore         # Docker ignore rules
+├── tests/
+│   └── test_main.py     # Unit tests
+└── README.md
+```
 
-### Technical Requirements
+## API Endpoints
 
-* **Framework:** Use [FastAPI](https://fastapi.tiangolo.com/) to build the API.
-* **Asynchronous Programming:** Use `asyncio` for all I/O-bound operations.
-* **Data Modeling:** Use [Pydantic](https://docs.pydantic.dev/) to define the data models for your API requests and responses.
-* **Dependencies:** List all project dependencies in a `requirements.txt` file.
+### Get All Movies
+```http
+GET /movies
+```
+Returns a list of all available movies.
 
-### Getting Started
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": "tt0111161",
+    "title": "The Shawshank Redemption",
+    "year": 1994,
+    "genres": ["drama"],
+    "plot": "Two imprisoned men bond over a number of years..."
+  }
+]
+```
 
-We have provided a basic project structure to get you started:
+### Get User's Watchlist
+```http
+GET /watchlist/{user_id}
+```
+Retrieves all movies in a user's watchlist.
 
-* `main.py`: A minimal FastAPI application with endpoint stubs for you to complete.
-* `movies.json`: A file containing the movie data for the service.
-* `requirements.txt`: A file containing the project's dependencies.
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": "tt0111161",
+    "title": "The Shawshank Redemption",
+    "year": 1994,
+    "genres": ["drama"],
+    "plot": "Two imprisoned men bond over a number of years..."
+  }
+]
+```
 
-You will need to:
+### Add Movie to Watchlist
+```http
+POST /watchlist/{user_id}
+```
 
-1. Install the required dependencies: `pip install -r requirements.txt`
-2. Run the application: `uvicorn main:app --reload`
-3. Implement the logic for the API endpoints in `main.py` (look for the `NotImplementedError`).
+**Request Body:**
+```json
+{
+  "movie_id": "tt0111161"
+}
+```
 
-### Optional Requirements
+**Response:** `200 OK`
+```json
+{
+  "message": "Movie added successfully",
+  "watchlist": [...]
+}
+```
 
-* **Containerization:** Create a `Dockerfile` and a corresponding `docker-compose.yml` file to allow the application to be run in a container.
-* **Unit Tests:** Write unit tests for the API endpoints. We recommend using `pytest`, but you are free to use any testing framework you are comfortable with.
+**Error Responses:**
+- `404 Not Found` - Movie does not exist
+- `400 Bad Request` - Movie already in watchlist
 
-### What We're Looking For
+### Remove Movie from Watchlist
+```http
+DELETE /watchlist/{user_id}/{movie_id}
+```
 
-* **Correctness:** The application should work as described in the feature requirements.
-* **Code Quality:** Your code should be clean, well-organized, and easy to understand.
-* **Best Practices:** We're interested in seeing your approach to error handling and API design.
-* **Problem-Solving:** How you structure your code and solve the given problem.
+**Response:** `200 OK`
+```json
+{
+  "message": "Movie removed successfully",
+  "watchlist": [...]
+}
+```
 
-### Submission
+**Error Responses:**
+- `404 Not Found` - User has no watchlist or movie not in watchlist
 
-Please submit your solution as a link to a Git repository (e.g., on GitHub or GitLab). Make sure the repository is public so we can access it.
+## Getting Started
 
-Good luck! We look forward to seeing your work.
+### Prerequisites
+
+- Python 3.11+
+- pip
+
+### Installation & Running Locally
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/rodrick-mpofu/fastapi-movie-watchlist.git
+   cd fastapi-movie-watchlist
+   ```
+
+2. **Create and activate virtual environment**
+   ```bash
+   # Create virtual environment
+   python -m venv venv
+
+   # Activate (Windows Git Bash)
+   source venv/Scripts/activate
+
+   # Activate (Mac/Linux)
+   source venv/bin/activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Run the application**
+   ```bash
+   uvicorn main:app --reload
+   ```
+
+5. **Access the API**
+   - API: http://localhost:8000
+   - Interactive docs: http://localhost:8000/docs
+   - Alternative docs: http://localhost:8000/redoc
+
+## Running with Docker
+
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Steps
+
+1. **Build and run the container**
+   ```bash
+   docker compose up --build
+   ```
+
+2. **Access the API**
+   - API: http://localhost:8000
+   - Interactive docs: http://localhost:8000/docs
+
+3. **Stop the container**
+   ```bash
+   # Press Ctrl+C, then:
+   docker compose down
+   ```
+
+## Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/test_main.py -v
+```
+
+## API Usage Examples
+
+### Using curl
+
+```bash
+# Get all movies
+curl http://localhost:8000/movies
+
+# Get user's watchlist
+curl http://localhost:8000/watchlist/user_123
+
+# Add movie to watchlist
+curl -X POST "http://localhost:8000/watchlist/user_123" \
+  -H "Content-Type: application/json" \
+  -d '{"movie_id": "tt0111161"}'
+
+# Remove movie from watchlist
+curl -X DELETE "http://localhost:8000/watchlist/user_123/tt0111161"
+```
+
+### Using Python requests
+
+```python
+import requests
+
+BASE_URL = "http://localhost:8000"
+
+# Get all movies
+response = requests.get(f"{BASE_URL}/movies")
+movies = response.json()
+
+# Add movie to watchlist
+response = requests.post(
+    f"{BASE_URL}/watchlist/user_123",
+    json={"movie_id": "tt0111161"}
+)
+result = response.json()
+```
+
+## Development
+
+### Code Quality
+- Clean, modular code structure
+- Comprehensive error handling
+- Type hints throughout
+- Async/await patterns for I/O operations
+
+### Testing
+- Unit tests for all endpoints
+- Edge case coverage
+- Database reset between tests
+
+## Future Enhancements
+
+- [ ] Persistent database (PostgreSQL/MongoDB)
+- [ ] User authentication and authorization
+- [ ] Movie rating and review system
+- [ ] Search and filter movies
+- [ ] Pagination for large watchlists
+
+## License
+
+This project is part of a take-home coding challenge.
+
+## Author
+
+Rodrick Mpofu
