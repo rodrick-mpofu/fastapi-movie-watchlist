@@ -92,4 +92,14 @@ async def remove_from_watchlist(user_id: str, movie_id: str):
     """
     Removes a movie from a user's watchlist.
     """
-    raise NotImplementedError
+    
+    # 1. Validate: Does this movie exist?
+    movie_exists = any(movie.id == movie_id for movie in MOVIES_DATA)
+    if not movie_exists:
+        raise HTTPException(status_code=404, detail="Movie not found")
+    
+    # 2. Remove the movie
+    WATCHLISTS[user_id].remove(movie_id)
+    
+    # 3. Return success with updated watchlist
+    return {"message": "Movie removed successfully", "watchlist": WATCHLISTS[user_id]}
