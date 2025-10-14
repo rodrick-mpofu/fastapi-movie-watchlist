@@ -44,7 +44,8 @@ async def get_watchlist(user_id: str):
     """
     Retrieves the watchlist for a given user.
     """
-    
+    await asyncio.sleep(0.1)  # Simulate DB query latency
+
     movie_ids = WATCHLISTS.get(user_id, [])
     
     # get the movies for the given movie ids
@@ -60,6 +61,7 @@ async def add_to_watchlist(user_id: str, add_request: WatchlistAddRequest):
     """
     Adds a movie to a user's watchlist.
     """
+    await asyncio.sleep(0.1)  # Simulate DB query latency
 
     # 1. Validate: Does this movie exist?
     movie_exists = any(movie.id == add_request.movie_id for movie in MOVIES_DATA)
@@ -92,6 +94,8 @@ async def remove_from_watchlist(user_id: str, movie_id: str):
     """
     Removes a movie from a user's watchlist.
     """
+    await asyncio.sleep(0.1)  # Simulate DB query latency
+
     
     # 1. Check if user exists
     if user_id not in WATCHLISTS:
