@@ -44,7 +44,16 @@ async def get_watchlist(user_id: str):
     """
     Retrieves the watchlist for a given user.
     """
-    raise NotImplementedError
+    
+    movie_ids = WATCHLISTS.get(user_id, [])
+    
+    # get the movies for the given movie ids
+    watchlist_movies = [
+        movie for movie in MOVIES_DATA 
+        if movie.id in movie_ids
+    ]
+    
+    return watchlist_movies
 
 @app.post("/watchlist/{user_id}")
 async def add_to_watchlist(user_id: str, add_request: WatchlistAddRequest):
