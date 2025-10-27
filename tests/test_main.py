@@ -46,24 +46,24 @@ class TestAddToWatchlist:
             "/watchlist/user_123",
             json={"movie_id": "tt0111161"}
         )
-        assert response.status_code == 200
-        
+        assert response.status_code == 201
+
         data = response.json()
         assert data["message"] == "Movie added successfully"
-        assert len(data["watchlist"]) == 1
-        assert data["watchlist"][0]["id"] == "tt0111161"
+        assert data["movie"]["id"] == "tt0111161"
+        assert data["movie"]["title"] == "The Shawshank Redemption"
     
     def test_add_movie_to_existing_watchlist(self):
         """Test adding a movie to existing watchlist"""
         # Setup: User already has one movie
         WATCHLISTS["user_123"] = ["tt0111161"]
-        
+
         response = client.post(
             "/watchlist/user_123",
             json={"movie_id": "tt0068646"}
         )
-        assert response.status_code == 200
-        assert len(response.json()["watchlist"]) == 2
+        assert response.status_code == 201
+        assert response.json()["movie"]["id"] == "tt0068646"
     
     def test_add_invalid_movie(self):
         """Test adding non-existent movie returns 404"""
@@ -94,14 +94,14 @@ class TestRemoveFromWatchlist:
         """Test removing a movie from watchlist"""
         # Setup: User has movies in watchlist
         WATCHLISTS["user_123"] = ["tt0111161", "tt0068646"]
-        
+
         response = client.delete("/watchlist/user_123/tt0111161")
-        assert response.status_code == 200
-        
-        data = response.json()
-        assert data["message"] == "Movie removed successfully"
-        assert len(data["watchlist"]) == 1
-        assert data["watchlist"][0]["id"] == "tt0068646"
+        assert response.status_code == 204
+        assert response.content == b""
+
+        # Verify movie was actually removed
+        assert "tt0111161" not in WATCHLISTS["user_123"]
+        assert "tt0068646" in WATCHLISTS["user_123"]
     
     def test_remove_from_nonexistent_user(self):
         """Test removing from non-existent user returns 404"""

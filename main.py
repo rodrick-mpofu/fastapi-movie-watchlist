@@ -1,6 +1,6 @@
 import asyncio
 import json
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 
 # Data Models
@@ -56,7 +56,7 @@ async def get_watchlist(user_id: str):
     
     return watchlist_movies
 
-@app.post("/watchlist/{user_id}")
+@app.post("/watchlist/{user_id}", status_code=201)
 async def add_to_watchlist(user_id: str, add_request: WatchlistAddRequest):
     """
     Adds a movie to a user's watchlist.
@@ -64,54 +64,42 @@ async def add_to_watchlist(user_id: str, add_request: WatchlistAddRequest):
     await asyncio.sleep(0.1)  # Simulate DB query latency
 
     # 1. Validate: Does this movie exist?
-    movie_exists = any(movie.id == add_request.movie_id for movie in MOVIES_DATA)
-    if not movie_exists:
+    added_movie = next((movie for movie in MOVIES_DATA if movie.id == add_request.movie_id), None)
+    if not added_movie:
         raise HTTPException(status_code=404, detail="Movie not found")
-    
+
     # 2. Initialize user's watchlist if it doesn't exist
     if user_id not in WATCHLISTS:
         WATCHLISTS[user_id] = []
-    
+
     # 3. Check for duplicates
     if add_request.movie_id in WATCHLISTS[user_id]:
         raise HTTPException(status_code=400, detail="Movie already in watchlist")
-    
+
     # 4. Add the movie
     WATCHLISTS[user_id].append(add_request.movie_id)
-    
-    # 5. Convert IDs to full Movie objects
-    watchlist_movies = [
-        movie for movie in MOVIES_DATA 
-        if movie.id in WATCHLISTS[user_id]
-    ]
-    
-    # 6. Return success with updated watchlist
-    return {"message": "Movie added successfully", "watchlist": watchlist_movies}
+
+    # 5. Return success with the added movie
+    return {"message": "Movie added successfully", "movie": added_movie}
     
 
-@app.delete("/watchlist/{user_id}/{movie_id}")
+@app.delete("/watchlist/{user_id}/{movie_id}", status_code=204)
 async def remove_from_watchlist(user_id: str, movie_id: str):
     """
     Removes a movie from a user's watchlist.
     """
     await asyncio.sleep(0.1)  # Simulate DB query latency
 
-    
     # 1. Check if user exists
     if user_id not in WATCHLISTS:
         raise HTTPException(status_code=404, detail="User has no watchlist")
-    
+
     # 2. Check if movie is in user's watchlist
     if movie_id not in WATCHLISTS[user_id]:
         raise HTTPException(status_code=404, detail="Movie not in watchlist")
-    
+
     # 3. Remove the movie
     WATCHLISTS[user_id].remove(movie_id)
-    
-    # 4. Convert IDs to full Movie objects
-    watchlist_movies = [
-        movie for movie in MOVIES_DATA 
-        if movie.id in WATCHLISTS[user_id]
-    ]
-    
-    return {"message": "Movie removed successfully", "watchlist": watchlist_movies}
+
+    # 4. Return 204 No Content (no response body)
+    return Response(status_code=204)
