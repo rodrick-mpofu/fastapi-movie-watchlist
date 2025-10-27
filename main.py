@@ -74,7 +74,7 @@ async def add_to_watchlist(user_id: str, add_request: WatchlistAddRequest):
 
     # 3. Check for duplicates
     if add_request.movie_id in WATCHLISTS[user_id]:
-        raise HTTPException(status_code=400, detail="Movie already in watchlist")
+        raise HTTPException(status_code=409, detail="Movie already in watchlist")
 
     # 4. Add the movie
     WATCHLISTS[user_id].append(add_request.movie_id)

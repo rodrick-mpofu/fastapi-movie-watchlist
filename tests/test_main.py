@@ -75,15 +75,15 @@ class TestAddToWatchlist:
         assert "Movie not found" in response.json()["detail"]
     
     def test_add_duplicate_movie(self):
-        """Test adding duplicate movie returns 400"""
+        """Test adding duplicate movie returns 409 Conflict"""
         # Setup: User already has this movie
         WATCHLISTS["user_123"] = ["tt0111161"]
-        
+
         response = client.post(
             "/watchlist/user_123",
             json={"movie_id": "tt0111161"}
         )
-        assert response.status_code == 400
+        assert response.status_code == 409
         assert "already in watchlist" in response.json()["detail"]
 
 
